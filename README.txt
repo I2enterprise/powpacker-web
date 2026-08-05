@@ -1,12 +1,15 @@
-POW PACKER WEBSITE - VERCEL DEPLOYMENT
+POWPACKER Website - Vercel deployment
 
-วิธีอัปโหลด:
-1. แตกไฟล์ ZIP
-2. เข้า https://vercel.com/new
-3. เลือก Add New > Project
-4. อัปโหลดโฟลเดอร์ vercel-deploy หรือใช้ Vercel CLI
-5. ไม่ต้องตั้งค่า Build Command
-6. Output Directory ให้เว้นว่าง
-7. กด Deploy
+1. Import this folder (or the ZIP contents) into Vercel.
+2. In Vercel Project Settings > Environment Variables, add:
+   SMTP_USER=helpdesk.i2it@gmail.com
+   SMTP_PASS=<new Gmail App Password>
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=465
+   SMTP_SECURE=true
+   SMTP_FROM=POWPACKER Website <helpdesk.i2it@gmail.com>
+3. Redeploy after saving the variables.
 
-เว็บไซต์เป็น Static HTML/CSS/JavaScript และเปิดจาก index.html
+The contact form posts to /api/contact. Gmail SMTP sends messages to info@powpacker.com and uses the visitor email as Reply-To.
+RESEND_API_KEY remains supported as a fallback when SMTP variables are not configured.
+Never place SMTP_PASS or an API key in source code or this ZIP.
