@@ -4,9 +4,9 @@
 
 **Goal:** Replace the numeric statistics strips on the home and About Us pages with responsive, bilingual cards describing POWPACKER's four working standards.
 
-**Architecture:** Keep the change static and dependency-free: both HTML pages receive the same semantic strip markup, `styles.css` owns the shared responsive presentation, and `translations.js` supplies the existing Thai-to-English text mapping. A Node test reads the generated source files to protect the agreed scope, including preservation of the capital and shareholder content outside the strips.
+**Architecture:** Keep the change static and dependency-free: both HTML pages receive the same semantic strip markup, `styles.css` owns the shared responsive presentation, and `translations.js` supplies the existing Thai-to-English text mapping. Browser-based checks exercise the rendered DOM, language switching, and responsive layout while visual inspection protects the agreed scope.
 
-**Tech Stack:** Static HTML5, CSS Grid, vanilla JavaScript translation dictionary, Node.js built-in test runner
+**Tech Stack:** Static HTML5, CSS Grid, vanilla JavaScript translation dictionary, local HTTP server, browser automation
 
 ## Global Constraints
 
@@ -27,12 +27,10 @@
 - `about.html`: replace only the trailing numeric strip with the same standards markup.
 - `styles.css`: replace numeric-strip selectors with standard-card typography, separators, and responsive layouts.
 - `translations.js`: add English mappings for the new Thai titles and descriptions.
-- `tests/strengths-standards.test.mjs`: verify strip content, semantics, translation coverage, responsive CSS, and preservation of out-of-scope company figures.
 
 ### Task 1: Replace Both Numeric Strips with the Bilingual Standards Component
 
 **Files:**
-- Create: `tests/strengths-standards.test.mjs`
 - Modify: `index.html:59-61`
 - Modify: `about.html:1`
 - Modify: `styles.css:1`
@@ -40,77 +38,15 @@
 
 **Interfaces:**
 - Consumes: `window.FULL_EN`, read by `translateFullSite(lang)` in `script.js`; `.reveal`, observed by the existing `IntersectionObserver`.
-- Produces: two `.standards` sections, each containing one `.standards-grid` and four `.standard-item` articles; English translations keyed by the exact Thai source strings.
+- Produces: two `.standards` sections, each containing one `.standards-grid` and four `.standard-item` articles; English translations keyed by the exact Thai source strings; browser-visible four-, two-, and one-column layouts.
 
-- [ ] **Step 1: Write the failing source-contract test**
+- [ ] **Step 1: Establish the failing browser check (RED)**
 
-Create `tests/strengths-standards.test.mjs`:
+Start a local static HTTP server from the isolated worktree and open `index.html` and `about.html` in the browser. For each page, inspect the rendered DOM and record that `.standards-grid` is absent while the old `.numbers-grid` contains four numeric items. This is the expected RED result because the requested standards component does not exist yet.
 
-```js
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+At a 1440 px viewport, also capture the current blue statistics strip so the before/after scope is auditable. Do not edit production files before this RED evidence is recorded.
 
-const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-
-const principles = [
-  ['QUALITY', 'คุณภาพ', 'ส่งมอบงานด้วยมาตรฐานและความใส่ใจในทุกขั้นตอน'],
-  ['PRECISION', 'ความแม่นยำ', 'วางแผนและดำเนินงานอย่างถูกต้องตามรายละเอียด'],
-  ['SAFETY', 'ความปลอดภัย', 'ให้ความสำคัญกับความปลอดภัยในการทำงานและการใช้งาน'],
-  ['RELIABILITY', 'ความน่าเชื่อถือ', 'ดูแลโครงการอย่างรับผิดชอบและพร้อมสนับสนุนระยะยาว']
-];
-
-function standardsSection(html) {
-  const match = html.match(/<section class="numbers standards">[\s\S]*?<\/section>/);
-  assert.ok(match, 'standards section should exist');
-  return match[0];
-}
-
-test('home and About Us pages render the four standards without counters', async () => {
-  for (const page of ['index.html', 'about.html']) {
-    const section = standardsSection(await read(page));
-    assert.equal((section.match(/class="standard-item"/g) || []).length, 4);
-    assert.doesNotMatch(section, /data-count|Registered Capital|I2 Enterprise Holding/);
-    for (const [label, title, description] of principles) {
-      assert.match(section, new RegExp(label));
-      assert.match(section, new RegExp(title));
-      assert.match(section, new RegExp(description));
-    }
-  }
-});
-
-test('company figures outside the replaced strips remain unchanged', async () => {
-  const home = await read('index.html');
-  const about = await read('about.html');
-  assert.match(home, /<strong>20M<\/strong><span>THB<\/span>/);
-  assert.match(home, /<strong>60%<\/strong><span>I2<\/span>/);
-  assert.match(about, /THB 20,000,000/);
-  assert.match(about, /I2 Enterprise PCL · 60%/);
-});
-
-test('new Thai copy has English translation entries', async () => {
-  const translations = await read('translations.js');
-  for (const [, title, description] of principles) {
-    assert.match(translations, new RegExp(`'${title}':'[^']+'`));
-    assert.match(translations, new RegExp(`'${description}':'[^']+'`));
-  }
-});
-
-test('standards grid declares desktop, tablet, and mobile layouts', async () => {
-  const css = await read('styles.css');
-  assert.match(css, /\.standards-grid\{[^}]*grid-template-columns:repeat\(4,1fr\)/);
-  assert.match(css, /@media\(max-width:980px\)[\s\S]*\.standards-grid\{[^}]*grid-template-columns:repeat\(2,1fr\)/);
-  assert.match(css, /@media\(max-width:700px\)[\s\S]*\.standards-grid\{[^}]*grid-template-columns:1fr/);
-});
-```
-
-- [ ] **Step 2: Run the test and confirm the new contract fails**
-
-Run: `npm test`
-
-Expected: FAIL because neither page contains `<section class="numbers standards">` yet.
-
-- [ ] **Step 3: Replace the numeric strip markup on both pages**
+- [ ] **Step 2: Replace the numeric strip markup on both pages**
 
 In both `index.html` and `about.html`, replace only the current `<section class="numbers">...</section>` with:
 
@@ -127,7 +63,7 @@ In both `index.html` and `about.html`, replace only the current `<section class=
 
 Do not edit `.certs` in `index.html` or `.company-facts` in `about.html`.
 
-- [ ] **Step 4: Replace numeric typography with standards-card styling**
+- [ ] **Step 3: Replace numeric typography with standards-card styling**
 
 In `styles.css`, keep `.numbers{padding:72px 0;background:var(--blue);color:#fff}` and replace the remaining `.numbers-grid`, `.numbers strong`, `.numbers span`, and `.numbers p` rules with:
 
@@ -158,7 +94,7 @@ Inside the existing `@media(max-width:700px)` block, replace the obsolete `.numb
 .standard-item:last-child{border-bottom:0;padding-bottom:0}
 ```
 
-- [ ] **Step 5: Add exact English translations for the new Thai copy**
+- [ ] **Step 4: Add exact English translations for the new Thai copy**
 
 Add these entries to `window.FULL_EN` in `translations.js`:
 
@@ -174,23 +110,25 @@ Add these entries to `window.FULL_EN` in `translations.js`:
 'มาตรฐานการทำงานของ POWPACKER':'POWPACKER working standards',
 ```
 
-- [ ] **Step 6: Run automated verification**
+- [ ] **Step 5: Run automated verification**
 
 Run: `npm test`
 
-Expected: all four source-contract tests PASS, along with any existing tests.
+Expected: all existing tests PASS with pristine output.
 
 Run: `git diff --check`
 
 Expected: no whitespace errors.
 
-- [ ] **Step 7: Inspect the rendered pages at responsive widths**
+- [ ] **Step 6: Verify rendered behavior in the browser (GREEN)**
 
-Serve the project locally and inspect `index.html` and `about.html` at approximately 1440 px, 768 px, and 390 px viewport widths. Confirm four columns, two columns, and one column respectively; separators must terminate cleanly and surrounding sections must not gain unintended gaps.
+Inspect `index.html` and `about.html` at approximately 1440 px, 768 px, and 390 px viewport widths. On both pages, assert that `.standards-grid` exists, contains exactly four `.standard-item` elements, contains no `[data-count]`, and computes to four, two, and one grid columns respectively. Confirm separators terminate cleanly and surrounding sections do not gain unintended gaps.
 
-- [ ] **Step 8: Commit the implementation**
+Switch each page from Thai to English using the visible language control. Confirm the four Thai titles and descriptions become their specified English translations while `QUALITY`, `PRECISION`, `SAFETY`, and `RELIABILITY` remain visible. Confirm the existing `20M` and `60%` content remains visible in the home credentials section and the corresponding company facts remain visible on the About Us page.
+
+- [ ] **Step 7: Commit the implementation**
 
 ```bash
-git add index.html about.html styles.css translations.js tests/strengths-standards.test.mjs
+git add index.html about.html styles.css translations.js
 git commit -m "feat: replace company stats with working standards"
 ```
