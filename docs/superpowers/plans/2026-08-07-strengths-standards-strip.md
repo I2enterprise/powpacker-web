@@ -40,11 +40,11 @@
 - Consumes: `window.FULL_EN`, read by `translateFullSite(lang)` in `script.js`; `.reveal`, observed by the existing `IntersectionObserver`.
 - Produces: two `.standards` sections, each containing one `.standards-grid` and four `.standard-item` articles; English translations keyed by the exact Thai source strings; browser-visible four-, two-, and one-column layouts.
 
-- [ ] **Step 1: Establish the failing browser check (RED)**
+- [ ] **Step 1: Establish the failing component check (RED)**
 
-Start a local static HTTP server from the isolated worktree and open `index.html` and `about.html` in the browser. For each page, inspect the rendered DOM and record that `.standards-grid` is absent while the old `.numbers-grid` contains four numeric items. This is the expected RED result because the requested standards component does not exist yet.
+Before editing production files, inspect `index.html` and `about.html` and record that `.standards-grid` is absent while the old `.numbers-grid` contains four numeric items. This is the expected RED result because the requested standards component does not exist yet.
 
-At a 1440 px viewport, also capture the current blue statistics strip so the before/after scope is auditable. Do not edit production files before this RED evidence is recorded.
+The in-app browser was attempted through localhost, loopback IP, LAN IP, and a direct file URL, but its security policy blocked every local route. The user explicitly approved static HTML/CSS and translation verification as the fallback. Do not edit production files before the RED evidence is recorded.
 
 - [ ] **Step 2: Replace the numeric strip markup on both pages**
 
@@ -120,11 +120,11 @@ Run: `git diff --check`
 
 Expected: no whitespace errors.
 
-- [ ] **Step 6: Verify rendered behavior in the browser (GREEN)**
+- [ ] **Step 6: Verify component structure and responsive behavior (GREEN)**
 
-Inspect `index.html` and `about.html` at approximately 1440 px, 768 px, and 390 px viewport widths. On both pages, assert that `.standards-grid` exists, contains exactly four `.standard-item` elements, contains no `[data-count]`, and computes to four, two, and one grid columns respectively. Confirm separators terminate cleanly and surrounding sections do not gain unintended gaps.
+Inspect `index.html` and `about.html`. On both pages, confirm that `.standards-grid` exists, contains exactly four `.standard-item` elements, and contains no `[data-count]`. Inspect the CSS rules and confirm four, two, and one grid columns at the desktop, `max-width:980px`, and `max-width:700px` breakpoints respectively, including appropriate separator resets when items wrap.
 
-Switch each page from Thai to English using the visible language control. Confirm the four Thai titles and descriptions become their specified English translations while `QUALITY`, `PRECISION`, `SAFETY`, and `RELIABILITY` remain visible. Confirm the existing `20M` and `60%` content remains visible in the home credentials section and the corresponding company facts remain visible on the About Us page.
+Confirm each exact Thai title and description has its specified English mapping in `translations.js`, while `QUALITY`, `PRECISION`, `SAFETY`, and `RELIABILITY` remain literal labels in both pages. Confirm the existing `20M` and `60%` content remains present in the home credentials section and the corresponding company facts remain present on the About Us page.
 
 - [ ] **Step 7: Commit the implementation**
 
