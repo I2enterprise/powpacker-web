@@ -41,6 +41,16 @@ export const FACTORY_PROJECTS = [
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const projectsDir = path.join(root, 'assets', 'projects', 'factory');
 
+function portfolioCards(page) {
+  return [...page.matchAll(/<article class="portfolio-card reveal">([\s\S]*?)<\/article>/g)]
+    .map(([, card]) => ({
+      asset: card.match(/--thumb:url\('([^']+)'\)/)?.[1],
+      location: card.match(/<small>([^<]+)<\/small>/)?.[1],
+      heading: card.match(/<h3>([^<]+)<\/h3>/)?.[1],
+      description: card.match(/<p>([^<]+)<\/p>/)?.[1],
+    }));
+}
+
 test('all 30 approved Factory WebP assets exist and are unique', async () => {
   assert.equal(FACTORY_PROJECTS.length, 30);
   assert.equal(new Set(FACTORY_PROJECTS.map(({ asset }) => asset)).size, 30);
@@ -69,4 +79,62 @@ test('Factory page contains 30 source-ordered cards and a real hero', async () =
   assert.equal(hero?.[1], 'assets/projects/factory/01-tgi-bp5-new-factory.webp');
   assert.equal(cards.length, 30);
   assert.deepEqual(cards, FACTORY_PROJECTS);
+});
+
+test('All Projects contains 15 Data Center, 30 Factory, Solar, then Sports', async () => {
+  const [allProjects, dataCenter] = await Promise.all([
+    readFile(path.join(root, 'projects.html'), 'utf8'),
+    readFile(path.join(root, 'projects-data-center.html'), 'utf8'),
+  ]);
+  const cards = portfolioCards(allProjects);
+
+  assert.equal(cards.length, 47);
+  assert.deepEqual(cards.slice(0, 15), portfolioCards(dataCenter));
+  assert.deepEqual(cards.slice(15, 45), FACTORY_PROJECTS.map((project) => ({
+    ...project,
+    asset: `assets/projects/factory/${project.asset}`,
+  })));
+  assert.deepEqual(cards.slice(45), [
+    {
+      asset: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=800&q=85',
+      location: 'ENERGY · THAILAND',
+      heading: 'PTT Khao Tao Solar',
+      description: 'ระบบประหยัดพลังงานและ Dashboard แสดงผลแบบ Real-time',
+    },
+    {
+      asset: 'https://images.unsplash.com/photo-1446776877081-d282a0f896e2?auto=format&fit=crop&w=800&q=85',
+      location: 'SATELLITE · NATIONWIDE',
+      heading: 'National Sports Training Center',
+      description: 'โครงสร้างพื้นฐานการสื่อสารสำหรับพื้นที่ห่างไกลทั่วประเทศ',
+    },
+  ]);
+});
+
+test('Home and portfolio pages retain complete project and content guards', async () => {
+  const [home, styles, projects, dataCenter, factory] = await Promise.all([
+    readFile(path.join(root, 'index.html'), 'utf8'),
+    readFile(path.join(root, 'styles.css'), 'utf8'),
+    readFile(path.join(root, 'projects.html'), 'utf8'),
+    readFile(path.join(root, 'projects-data-center.html'), 'utf8'),
+    readFile(path.join(root, 'projects-factory.html'), 'utf8'),
+  ]);
+
+  assert.equal([...home.matchAll(/<article class="project(?: project-large)? reveal">/g)].length, 3);
+  assert.match(home, /<h3>Osprey Data Center<\/h3>/);
+  assert.match(home, /<h3>OTT Data Center<\/h3>/);
+  assert.match(home, /<h3>PTT Khao Tao Solar<\/h3>/);
+  assert.match(styles, /\.p1\{height:510px;background-image:url\('assets\/projects\/osprey-data-center\.webp'\)\}/);
+  assert.match(styles, /\.p2\{background-image:url\('assets\/projects\/ott-data-center\.webp'\)\}/);
+  assert.match(styles, /\.p3\{background-image:url\('https:\/\/images\.unsplash\.com\/photo-1509391366360-2e959784a276\?auto=format&fit=crop&w=800&q=85'\)\}/);
+  assert.equal(portfolioCards(dataCenter).length, 15);
+  assert.equal(portfolioCards(factory).length, 30);
+
+  for (const [file, page] of Object.entries({
+    'projects.html': projects,
+    'projects-data-center.html': dataCenter,
+    'projects-factory.html': factory,
+  })) {
+    assert.doesNotMatch(page, /https?:\/\/(?:www\.)?powpacker\.(?:com|co\.th)\b/i, `${file} must not include a POWPACKER editor hotlink`);
+    assert.doesNotMatch(page, /(?:\b(?:THB|USD)\s*\d|\b\d[\d,]*(?:\.\d+)?\s*(?:THB|บาท)\b)/i, `${file} must not include a monetary value`);
+  }
 });
