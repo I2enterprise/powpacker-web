@@ -59,3 +59,14 @@ test('all 30 approved Factory WebP assets exist and are unique', async () => {
 
   assert.equal(new Set(hashes).size, 30, 'Factory assets must have unique SHA-256 hashes');
 });
+
+test('Factory page contains 30 source-ordered cards and a real hero', async () => {
+  const page = await readFile(path.join(root, 'projects-factory.html'), 'utf8');
+  const hero = page.match(/<section class="page-hero" style="--page-image:url\('([^']+)'\)">/);
+  const cards = [...page.matchAll(/<article class="portfolio-card reveal"><div class="thumb" style="--thumb:url\('assets\/projects\/factory\/([^']+)'\)"><\/div><div class="body"><small>([^<]+)<\/small><h3>([^<]+)<\/h3><p>([^<]+)<\/p><\/div><\/article>/g)]
+    .map(([, asset, location, heading, description]) => ({ asset, heading, location, description }));
+
+  assert.equal(hero?.[1], 'assets/projects/factory/01-tgi-bp5-new-factory.webp');
+  assert.equal(cards.length, 30);
+  assert.deepEqual(cards, FACTORY_PROJECTS);
+});
