@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the numeric statistics strips on the home and About Us pages with responsive, bilingual cards describing POWPACKER's four working standards, and remove the separate About Us company-facts row without replacement.
+**Goal:** Replace the numeric statistics strips on the home and About Us pages with responsive, bilingual cards describing POWPACKER's four working standards, remove the separate About Us company-facts row without replacement, and align every home credentials card with work certification.
 
-**Architecture:** Keep the change static and dependency-free: both HTML pages receive the same semantic strip markup, `styles.css` owns the shared responsive presentation, and `translations.js` supplies the existing Thai-to-English text mapping. The About Us company-facts markup and its dedicated `brand.css` rules are removed together so no empty layout or dead styling remains. Static checks protect structure, language mappings, responsive rules, and the home credentials scope; the local preview remains available for external-browser inspection.
+**Architecture:** Keep the change static and dependency-free: both HTML pages receive the same semantic strip markup, `styles.css` owns the shared responsive presentation, and `translations.js` supplies the existing Thai-to-English text mapping. The About Us company-facts markup and its dedicated `brand.css` rules are removed together so no empty layout or dead styling remains. The existing home credentials layout is reused while its two company-information cards become qualitative certification evidence. Static checks protect structure, language mappings, responsive rules, and approved copy; the local preview remains available for external-browser inspection.
 
 **Tech Stack:** Static HTML5, CSS Grid, vanilla JavaScript translation dictionary, Node.js static checks, local HTTP server
 
@@ -12,7 +12,9 @@
 
 - Replace the `<section class="numbers">` section in `index.html` and `about.html`.
 - Preserve the existing blue background, four-column rhythm, and surrounding page flow.
-- Preserve the existing credentials section on the home page, including its `20M` and `60%` values.
+- Preserve the existing three-card credentials layout and the `11 Documents / Work Certificates` card on the home page.
+- Replace `20M / THB / Registered Capital` with `VERIFIED / By Organizations / Official Work Confirmation`.
+- Replace `60% / I2 / Major Shareholder` with `PROVEN / Delivery Quality / Project References`.
 - Remove the entire `.company-facts` row from `about.html`, including registered date, registered capital, major shareholder, and head office.
 - Collapse the space occupied by `.company-facts`; do not add replacement content.
 - Present exactly four principles: Quality, Precision, Safety, and Reliability.
@@ -24,7 +26,7 @@
 
 ## File Structure
 
-- `index.html`: replace the home-page numeric strip with the shared standards markup.
+- `index.html`: replace the home-page numeric strip with the shared standards markup and align the credentials cards with certification evidence.
 - `about.html`: replace the trailing numeric strip with the shared standards markup and remove the company-facts row.
 - `styles.css`: replace numeric-strip selectors with standard-card typography, separators, and responsive layouts.
 - `translations.js`: add English mappings for the new Thai titles and descriptions.
@@ -65,7 +67,7 @@ In both `index.html` and `about.html`, replace only the current `<section class=
 
 Do not edit `.certs` in `index.html` or `.company-facts` in `about.html`.
 
-This instruction applies to Task 1 only. Task 2 deliberately removes `.company-facts` after the standards component is complete.
+This instruction applies to Task 1 only. Task 2 deliberately removes `.company-facts`, and Task 3 deliberately replaces the `20M` and `60%` credentials cards after the standards component is complete.
 
 - [ ] **Step 3: Replace numeric typography with standards-card styling**
 
@@ -213,4 +215,67 @@ Request `http://127.0.0.1:4173/about.html` from the existing preview server and 
 ```bash
 git add about.html brand.css
 git commit -m "feat: remove about company facts"
+```
+
+Task 2's Home credentials preservation check records the state before Task 3. Task 3 intentionally replaces those two cards while retaining the credentials layout and first card.
+
+### Task 3: Align the Home Credentials Cards with Certification Evidence
+
+**Files:**
+- Modify: `index.html:78`
+
+**Interfaces:**
+- Consumes: the existing `.credentials`, `.credential-grid`, and three-card `.certs` layout plus the `awards.html` link.
+- Produces: exactly three certification-related cards with the first card unchanged and two approved qualitative evidence cards; no company capital/shareholder data remains in `section#credentials`.
+
+- [ ] **Step 1: Establish the failing credentials check (RED)**
+
+Before editing production files, isolate `section#credentials` in `index.html` and record:
+
+- exactly three `.certs` cards exist;
+- the first card is `11 / Documents / Work Certificates`;
+- the second card still contains `20M / THB / Registered Capital`;
+- the third card still contains `60% / I2 / Major Shareholder`;
+- the approved `VERIFIED` and `PROVEN` cards are absent.
+
+Assert the approved final state and record the expected failure before editing.
+
+- [ ] **Step 2: Replace only the two company-information cards**
+
+In `section#credentials` within `index.html`, preserve the first card and replace the second and third card markup with:
+
+```html
+<div><strong>VERIFIED</strong><span>By Organizations</span><small>OFFICIAL WORK CONFIRMATION</small></div><div><strong>PROVEN</strong><span>Delivery Quality</span><small>PROJECT REFERENCES</small></div>
+```
+
+Do not change the section heading, description, button, link, `.certs` wrapper, first card, CSS, translations, or any other occurrence outside `section#credentials`.
+
+- [ ] **Step 3: Verify the approved credentials state (GREEN)**
+
+Run a focused static check confirming:
+
+- `section#credentials` contains exactly three `.certs` cards.
+- The first card remains exactly `11 / Documents / Work Certificates`.
+- The second and third cards contain the exact approved `VERIFIED` and `PROVEN` copy.
+- `20M`, `THB`, `REGISTERED CAPITAL`, `60%`, `I2`, and `MAJOR SHAREHOLDER` are absent from `section#credentials`.
+- The existing `awards.html` link and button copy remain unchanged.
+- The standards sections and About Us removal remain unchanged.
+
+Run: `npm.cmd test`
+
+Expected: all existing tests PASS with zero failures.
+
+Run: `git diff --check`
+
+Expected: no whitespace errors.
+
+- [ ] **Step 4: Confirm the local preview updates**
+
+Request `http://127.0.0.1:4173/index.html` from the existing preview server and confirm HTTP 200. Inspect the updated credentials section in the available browser at desktop width and confirm the two approved labels fit inside their cards without clipping.
+
+- [ ] **Step 5: Commit the credentials update**
+
+```bash
+git add index.html
+git commit -m "feat: align credentials with certifications"
 ```
