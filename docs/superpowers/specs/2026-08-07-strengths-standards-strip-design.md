@@ -2,14 +2,15 @@
 
 ## Goal
 
-Replace the blue numeric statistics strip on the home page and About Us page with a strengths-and-standards strip that communicates how POWPACKER works without presenting company figures.
+Replace the blue numeric statistics strip on the home page and About Us page with a strengths-and-standards strip that communicates how POWPACKER works without presenting company figures. Remove the separate four-item company-facts row from the About Us page without adding replacement content.
 
 ## Scope
 
-- Replace only the `<section class="numbers">` section in `index.html` and `about.html`.
+- Replace the `<section class="numbers">` section in `index.html` and `about.html`.
 - Preserve the existing blue background, four-column rhythm, and surrounding page flow.
-- Do not change the registered-capital or shareholder information shown elsewhere on either page.
-- Do not change the existing credentials section or company-facts section.
+- Preserve the existing credentials section on the home page, including its `20M` and `60%` values.
+- Remove the entire `.company-facts` row from `about.html`, including registered date, registered capital, major shareholder, and head office.
+- Collapse the space occupied by `.company-facts`; do not add replacement content.
 
 ## Content
 
@@ -41,6 +42,7 @@ The English principle name will act as a compact visual label. The Thai title an
 ## Verification
 
 - Confirm both pages show the four principles and no numeric statistics inside the replaced strips.
-- Confirm the other occurrences of `20M`, `60%`, registered capital, and shareholder information remain unchanged.
+- Confirm the home-page credentials section retains its existing `20M` and `60%` values.
+- Confirm `.company-facts` and all four of its items are absent from the About Us page, with no empty wrapper or replacement section left behind.
 - Check desktop, tablet, and mobile layouts for wrapping, spacing, and separators.
 - Run the existing test command and inspect both affected pages for HTML/CSS regressions.
