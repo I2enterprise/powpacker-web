@@ -2,18 +2,19 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the numeric statistics strips on the home and About Us pages with responsive, bilingual cards describing POWPACKER's four working standards.
+**Goal:** Replace the numeric statistics strips on the home and About Us pages with responsive, bilingual cards describing POWPACKER's four working standards, and remove the separate About Us company-facts row without replacement.
 
-**Architecture:** Keep the change static and dependency-free: both HTML pages receive the same semantic strip markup, `styles.css` owns the shared responsive presentation, and `translations.js` supplies the existing Thai-to-English text mapping. Browser-based checks exercise the rendered DOM, language switching, and responsive layout while visual inspection protects the agreed scope.
+**Architecture:** Keep the change static and dependency-free: both HTML pages receive the same semantic strip markup, `styles.css` owns the shared responsive presentation, and `translations.js` supplies the existing Thai-to-English text mapping. The About Us company-facts markup and its dedicated `brand.css` rules are removed together so no empty layout or dead styling remains. Static checks protect structure, language mappings, responsive rules, and the home credentials scope; the local preview remains available for external-browser inspection.
 
-**Tech Stack:** Static HTML5, CSS Grid, vanilla JavaScript translation dictionary, local HTTP server, browser automation
+**Tech Stack:** Static HTML5, CSS Grid, vanilla JavaScript translation dictionary, Node.js static checks, local HTTP server
 
 ## Global Constraints
 
-- Replace only the `<section class="numbers">` section in `index.html` and `about.html`.
+- Replace the `<section class="numbers">` section in `index.html` and `about.html`.
 - Preserve the existing blue background, four-column rhythm, and surrounding page flow.
-- Do not change the registered-capital or shareholder information shown elsewhere on either page.
-- Do not change the existing credentials section or company-facts section.
+- Preserve the existing credentials section on the home page, including its `20M` and `60%` values.
+- Remove the entire `.company-facts` row from `about.html`, including registered date, registered capital, major shareholder, and head office.
+- Collapse the space occupied by `.company-facts`; do not add replacement content.
 - Present exactly four principles: Quality, Precision, Safety, and Reliability.
 - Use four columns on desktop, two columns on tablet, and one column on narrow mobile screens.
 - Preserve reveal-on-scroll behavior and remove counter animation from the replaced markup.
@@ -24,9 +25,10 @@
 ## File Structure
 
 - `index.html`: replace the home-page numeric strip with the shared standards markup.
-- `about.html`: replace only the trailing numeric strip with the same standards markup.
+- `about.html`: replace the trailing numeric strip with the shared standards markup and remove the company-facts row.
 - `styles.css`: replace numeric-strip selectors with standard-card typography, separators, and responsive layouts.
 - `translations.js`: add English mappings for the new Thai titles and descriptions.
+- `brand.css`: remove the orphaned company-facts rules while preserving the directors grid.
 
 ### Task 1: Replace Both Numeric Strips with the Bilingual Standards Component
 
@@ -62,6 +64,8 @@ In both `index.html` and `about.html`, replace only the current `<section class=
 ```
 
 Do not edit `.certs` in `index.html` or `.company-facts` in `about.html`.
+
+This instruction applies to Task 1 only. Task 2 deliberately removes `.company-facts` after the standards component is complete.
 
 - [ ] **Step 3: Replace numeric typography with standards-card styling**
 
@@ -131,4 +135,82 @@ Confirm each exact Thai title and description has its specified English mapping 
 ```bash
 git add index.html about.html styles.css translations.js
 git commit -m "feat: replace company stats with working standards"
+```
+
+### Task 2: Remove the About Us Company-Facts Row
+
+**Files:**
+- Modify: `about.html:1`
+- Modify: `brand.css:5-6`
+
+**Interfaces:**
+- Consumes: the existing `.mission-grid`, `#board` heading, `.directors` grid, and the home-page `.certs` section.
+- Produces: an About Us content flow where `.mission-grid` is followed directly by `#board`, with no `.company-facts` markup or CSS; the home credentials remain unchanged.
+
+- [ ] **Step 1: Establish the failing removal check (RED)**
+
+Before editing production files, run a focused static check that asserts `about.html` contains no `.company-facts` element and `brand.css` contains no `.company-facts` selector. Record the expected failure because both the row and its styling still exist. Also record that the current row has exactly four items so the removal scope is explicit.
+
+- [ ] **Step 2: Remove the entire company-facts row from About Us**
+
+In `about.html`, remove this complete element and leave no empty wrapper:
+
+```html
+<div class="company-facts reveal"><div><small>REGISTERED</small><strong>7 February 2025</strong></div><div><small>REGISTERED CAPITAL</small><strong>THB 20,000,000</strong></div><div><small>MAJOR SHAREHOLDER</small><strong>I2 Enterprise PCL · 60%</strong></div><div><small>HEAD OFFICE</small><strong>Latphrao, Bangkok</strong></div></div>
+```
+
+Do not add a replacement section. The existing `<div class="content-heading reveal" id="board" ...>` must follow the closing `.mission-grid` directly.
+
+- [ ] **Step 3: Remove orphaned company-facts CSS**
+
+In `brand.css`, remove these now-unused selectors and their declarations:
+
+```css
+.company-facts
+.company-facts div
+.company-facts small
+.company-facts strong
+```
+
+Inside `@media(max-width:700px)`, change the combined selector:
+
+```css
+.company-facts,.directors{grid-template-columns:1fr 1fr}
+```
+
+to:
+
+```css
+.directors{grid-template-columns:1fr 1fr}
+```
+
+Do not change any `.directors` declarations or other responsive behavior.
+
+- [ ] **Step 4: Verify the removal and preserved scope (GREEN)**
+
+Run a focused static check confirming:
+
+- `about.html` has no `.company-facts` class, no four removed labels, and no four removed values.
+- `brand.css` has no `.company-facts` selector.
+- `.mission-grid` is followed directly by the existing `#board` content heading.
+- The About Us standards strip still has four `.standard-item` articles.
+- The home credentials section still contains `<strong>20M</strong>` and `<strong>60%</strong>`.
+
+Run: `npm.cmd test`
+
+Expected: all existing tests PASS with zero failures.
+
+Run: `git diff --check`
+
+Expected: no whitespace errors.
+
+- [ ] **Step 5: Confirm the local preview updates**
+
+Request `http://127.0.0.1:4173/about.html` from the existing preview server and confirm HTTP 200. The browser-access fallback remains static verification because the in-app browser blocks local routes; the user can inspect the same URL in Chrome or Edge.
+
+- [ ] **Step 6: Commit the removal**
+
+```bash
+git add about.html brand.css
+git commit -m "feat: remove about company facts"
 ```
