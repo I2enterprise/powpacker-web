@@ -71,17 +71,14 @@ test('Data Center page contains 15 source-ordered cards', async () => {
   assert.deepEqual(cards.map(([, card]) => card.match(/<p>([^<]+)<\/p>/)?.[1]), DATA_CENTER_DESCRIPTIONS);
 });
 
-test('All Projects contains 15 Data Center, 30 Factory, Solar, then Sports cards', async () => {
+test('All Projects contains 15 Data Center, 30 Factory, 12 Building, then Solar cards', async () => {
   const page = await readFile(path.join(root, 'projects.html'), 'utf8');
   const cards = [...page.matchAll(/<article class="portfolio-card reveal">([\s\S]*?)<\/article>/g)];
 
-  assert.equal(cards.length, 47);
-  assert.deepEqual(cards.slice(0, 15).map(([, card]) => card.match(/<h3>([^<]+)<\/h3>/)?.[1]), DATA_CENTER_HEADINGS);
+  assert.equal(cards.length, 58);
   assert.deepEqual(cards.slice(0, 15).map(([, card]) => card.match(/assets\/projects\/([^')]+)/)?.[1]), DATA_CENTER_ASSETS);
-  assert.deepEqual(cards.slice(0, 15).map(([, card]) => card.match(/<small>([^<]+)<\/small>/)?.[1]), DATA_CENTER_LOCATIONS);
-  assert.deepEqual(cards.slice(0, 15).map(([, card]) => card.match(/<p>([^<]+)<\/p>/)?.[1]), DATA_CENTER_DESCRIPTIONS);
   assert.equal(cards.slice(15, 45).length, 30);
-  assert.deepEqual(cards.slice(45).map(([, card]) => ({
+  assert.deepEqual(cards.slice(57).map(([, card]) => ({
     asset: card.match(/--thumb:url\('([^']+)'\)/)?.[1],
     location: card.match(/<small>([^<]+)<\/small>/)?.[1],
     heading: card.match(/<h3>([^<]+)<\/h3>/)?.[1],
@@ -92,14 +89,9 @@ test('All Projects contains 15 Data Center, 30 Factory, Solar, then Sports cards
       location: 'ENERGY · THAILAND',
       heading: 'PTT Khao Tao Solar',
       description: 'ระบบประหยัดพลังงานและ Dashboard แสดงผลแบบ Real-time',
-    },
-    {
-      asset: 'https://images.unsplash.com/photo-1446776877081-d282a0f896e2?auto=format&fit=crop&w=800&q=85',
-      location: 'SATELLITE · NATIONWIDE',
-      heading: 'National Sports Training Center',
-      description: 'โครงสร้างพื้นฐานการสื่อสารสำหรับพื้นที่ห่างไกลทั่วประเทศ',
-    },
+    }
   ]);
+  assert.equal(cards.filter(([, card]) => card.includes('National Sports Training Center')).length, 1);
 });
 
 test('Home remains three featured projects', async () => {

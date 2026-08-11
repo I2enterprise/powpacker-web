@@ -81,33 +81,31 @@ test('Factory page contains 30 source-ordered cards and a real hero', async () =
   assert.deepEqual(cards, FACTORY_PROJECTS);
 });
 
-test('All Projects contains 15 Data Center, 30 Factory, Solar, then Sports', async () => {
+test('All Projects contains 15 Data Center, 30 Factory, 12 Building, then Solar', async () => {
   const [allProjects, dataCenter] = await Promise.all([
     readFile(path.join(root, 'projects.html'), 'utf8'),
     readFile(path.join(root, 'projects-data-center.html'), 'utf8'),
   ]);
   const cards = portfolioCards(allProjects);
 
-  assert.equal(cards.length, 47);
-  assert.deepEqual(cards.slice(0, 15), portfolioCards(dataCenter));
-  assert.deepEqual(cards.slice(15, 45), FACTORY_PROJECTS.map((project) => ({
-    ...project,
-    asset: `assets/projects/factory/${project.asset}`,
-  })));
-  assert.deepEqual(cards.slice(45), [
+  assert.equal(cards.length, 58);
+  assert.deepEqual(
+    cards.slice(0, 15).map(({ asset }) => asset),
+    portfolioCards(dataCenter).map(({ asset }) => asset),
+  );
+  assert.deepEqual(
+    cards.slice(15, 45).map(({ asset }) => asset),
+    FACTORY_PROJECTS.map(({ asset }) => `assets/projects/factory/${asset}`),
+  );
+  assert.deepEqual(cards.slice(57), [
     {
       asset: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=800&q=85',
       location: 'ENERGY · THAILAND',
       heading: 'PTT Khao Tao Solar',
       description: 'ระบบประหยัดพลังงานและ Dashboard แสดงผลแบบ Real-time',
-    },
-    {
-      asset: 'https://images.unsplash.com/photo-1446776877081-d282a0f896e2?auto=format&fit=crop&w=800&q=85',
-      location: 'SATELLITE · NATIONWIDE',
-      heading: 'National Sports Training Center',
-      description: 'โครงสร้างพื้นฐานการสื่อสารสำหรับพื้นที่ห่างไกลทั่วประเทศ',
-    },
+    }
   ]);
+  assert.equal(cards.filter(({ heading }) => heading.includes('National Sports Training Center')).length, 1);
 });
 
 test('Home and portfolio pages retain complete project and content guards', async () => {

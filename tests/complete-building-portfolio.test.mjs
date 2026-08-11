@@ -38,6 +38,28 @@ export const BUILDING_SOURCE_TO_ASSET = [
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const projectsDir = path.join(root, 'assets', 'projects', 'building');
 
+const PRESERVED_ALL_PROJECTS_CARD_HASHES = [
+  '40c272a86920497e19a976a73a85d8b07335a648691d40ac0fa5d706a977f6d3', '63847c205388b3f8dfdf28bd1826668445f6f782349b901078c3e591275c040f', 'f59b558e873910b781ed5be8c7b373eba8a9aea20d8b8284838476b013340cb9', '7cbd080a2d214dd0f45250d0af7e5da3ed71dfaa5ec4be87c8795ed87a314dd7', 'e221f547d82b5445ab26d41cb607c7bb1c45ac96ff1227b19d6568cce0ebfa57',
+  '81a7f56e8b0308df75ff412c54737e1d4fb089b81868d49d77501d6532e137fb', 'e1d62f7c5556d99ea11f705da611bc0a672571911e070b04ef9ffbb512f14c73', 'c6b81f594ab78105e8ca50cc76f1297cf6f685a5e742aa42cde17dd206d55a7d', '2dd004b9e0e8663f59611adba34807db99b90b83a0f49db8aab3284e97e7cfe4', 'b041c1a7a9a52af7f7fcfcb7bad7e8a79b0ec25dc7b297a0d40da690c4dbb759',
+  'c629885d20e58ed1de1144c26c003dd4e48a79b956eb123c53f46d79400c5b6d', '692db23663f303c80cc5adaac1cb53416bc1c38061032fa265d2fa7d4cb0e5f6', '979838602337a1e793c7429a70b283734581919f37ab8ecad15102e828605f03', 'cb354fb8ff5023c94015400f536dc793682f1cc4394c7705a6e8e1053d496a37', '155c423642c6b2792416657567722ced1d2d96945c248ab6a65652786446cf6b',
+  'e63b37080953c5ca67538b33453cd3e9270d01ab176f7dcead3f50c6838b1fc6', 'c782036e3573c7ff797e5325cd84e3654ac8765663f632ddd0c175c7a472b278', '0528eb3514fb7164dc4f7081ef8f85c21d25880d6cb95a9a30381f12725978f8', '8fca61d8825c423d400c339f3fb844ae2585e519e6bfcfd2c3a858d25dd48009', 'f73dbf01d504d5665bf1fc41003d1490b8295bd7d28b3765cc7e2b272429c657',
+  'c035b9c678f6d12aeb22b5510ab3d5510dbc248781c625de1ba2bc11e104377c', '91515e838e2ab0d9a70265fd66b99600871cdc8da6cfe79fd567bffe030b566e', '922cfe976c044681ed4c5981a1f19ed83253a588f2ce6fd9682734879f879d8d', 'd77f44873e2f3b8b2e65cd229a3c1dd6f359ebbfe783c57e9440e58c19299f85', '6b126ddc1e355009a77fe1f2df78b28e188b0b12146ecab6518e773bda41c24f',
+  '7485fcc4c3df6245d6a9fe25838b0d202cf6bcb3e6360f5364d0c83655052de9', 'e6202b52c8c9797e99542531199c8db771e12c7d081a39bb8dcb3293bc9e6681', 'b9bff2fc09a9972511152521a25bd504d81fa524c04b1cc66aa4009226e1971a', '1d12225bbcdc845218f4f14656a101b15ecb90e09808f49acabe52730bbcf669', 'ac24bfad182336256cb26096fe0a475fe6eb04d6739b385e35bfefb6d402eefd',
+  '048d470a6e10dc615d785cab7680f59eec18165eef0f10fe2cb3614f208d70a4', 'fb6a51d03c30d6b0a208ed883d835524c54b11dd7e9894722703723045cc2014', '362c7b705c3e0d4621ab4e1881ceabe7b4035c930a87687c7221b24470b31980', '3f762faf7db35cfb01f6ead838cd41fc7249ca60dbf9ed12f20cb333d6051cc8', '550fd114bd52946fe9d7cc140d33cd3a83e6c12bc62baf40540126a00751a7ed',
+  'db9178cac811ac7aee68cdfd12e48352d1d4204d9dd9419952af70caba53820e', '091b2a04f2b21d6f43acfca4772ae0ffa0a8884ace5e15451f172d0a4fa9d256', '8b9a4f1fc2ac624950beadf6fc1f11b9a998826c64862892d45f347588f9973d', 'c1d3a6922f37d99b02e734ee064d18d1be5df241724662485c8b2861a3e8e834', '00fbe3b110ff6091a26223152267ab1574b2176a0dfbbc1e8c12fbf8a731096c',
+  '06974a721478f57f1548c833270183f74ee0d03f965c4338797bc1735528f8b8', '3dbd1cb4556907d5f435f3f10760ddc39fd3302ff10b13acc7d1448d05874392', '1a1f70500d3c2e979c013d5cc3b1c8968d3895101b81f02edbcd4d2b1ba4b638', 'a78e5557a468d17f5be1c9bdc78b304bb5ee43c8f52347a63aa3d9faa2017d24', 'bf4a74c51938b67a6bed82bc48b71fd0efcc65341e7af02603a5d3236f8e452d',
+];
+const PRESERVED_SOLAR_CARD_HASH = '034ec84d779551734ccceeb496484de8dae76529366ee55f352fa887c6ad59d4';
+const PRESERVED_HOME_CARD_HASHES = ['7db01621e197318ee925d09d967cb149ed1d3a965275a243b84dcc57838f76f9', '9322ede808b73218534e1abe98d542bc5a0331db7d58edd10e52a8b46b02c6dd', 'ab2d99cf0e2cb223d6d1484a007edd03ffef80a371bdcce1334375c463b6e7e0'];
+
+function portfolioArticles(page) {
+  return [...page.matchAll(/<article class="portfolio-card reveal">[\s\S]*?<\/article>/g)].map(([article]) => article);
+}
+
+function sha256(value) {
+  return createHash('sha256').update(value).digest('hex');
+}
+
 function webpDimensions(bytes) {
   const chunk = bytes.subarray(12, 16).toString('ascii');
   assert.ok(['VP8 ', 'VP8L', 'VP8X'].includes(chunk), `unsupported WebP chunk ${chunk}`);
@@ -99,6 +121,25 @@ test('all 12 approved Building WebP assets are 650 by 371 and unique', async () 
   }
 
   assert.equal(new Set(hashes).size, 12, 'Building assets must have unique SHA-256 hashes');
+});
+
+test('All Projects preserves existing cards while inserting canonical Building cards before Solar', async () => {
+  const [allProjects, building, indexPage] = await Promise.all([
+    readFile(path.join(root, 'projects.html'), 'utf8'),
+    readFile(path.join(root, 'projects-building.html'), 'utf8'),
+    readFile(path.join(root, 'index.html'), 'utf8'),
+  ]);
+  const allCards = portfolioArticles(allProjects);
+  const buildingCards = portfolioArticles(building);
+  const homeCards = [...indexPage.matchAll(/<article class="project(?: project-large)? reveal">[\s\S]*?<\/article>/g)].map(([article]) => article);
+
+  assert.equal(allCards.length, 58);
+  assert.deepEqual(allCards.slice(0, 45).map(sha256), PRESERVED_ALL_PROJECTS_CARD_HASHES);
+  assert.deepEqual(allCards.slice(45, 57), buildingCards);
+  assert.equal(sha256(allCards[57]), PRESERVED_SOLAR_CARD_HASH);
+  assert.equal((allProjects.match(/National Sports Training Center/g) ?? []).length, 1);
+  assert.equal(homeCards.length, 3);
+  assert.deepEqual(homeCards.map(sha256), PRESERVED_HOME_CARD_HASHES);
 });
 
 test('Building page contains the approved hero and 12 local source-ordered cards', async () => {
