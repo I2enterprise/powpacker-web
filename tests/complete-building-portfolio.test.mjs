@@ -100,3 +100,22 @@ test('all 12 approved Building WebP assets are 650 by 371 and unique', async () 
 
   assert.equal(new Set(hashes).size, 12, 'Building assets must have unique SHA-256 hashes');
 });
+
+test('Building page contains the approved hero and 12 local source-ordered cards', async () => {
+  const page = await readFile(path.join(root, 'projects-building.html'), 'utf8');
+  const hero = page.match(/<section class="page-hero" style="--page-image:url\('([^']+)'\)">/);
+  const cards = [...page.matchAll(/<article class="portfolio-card reveal"><div class="thumb" style="--thumb:url\('assets\/projects\/building\/([^']+)'\)"><\/div><div class="body"><small>([^<]+)<\/small><h3>([^<]+)<\/h3><p>([^<]+)<\/p><\/div><\/article>/g)]
+    .map(([, asset, location, heading, description]) => ({
+      asset,
+      location,
+      heading: heading.replaceAll('&amp;', '&'),
+      description: description.replaceAll('&amp;', '&'),
+    }));
+
+  assert.equal(hero?.[1], 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=85');
+  assert.equal([...page.matchAll(/<article class="portfolio-card reveal">/g)].length, 12);
+  assert.deepEqual(cards, BUILDING_PROJECTS);
+  assert.doesNotMatch(page, /https?:\/\/(?:www\.)?pacdd\.com\b/i);
+  assert.doesNotMatch(page, /https?:\/\/(?:www\.)?powpacker\.(?:com|co\.th)\b/i);
+  assert.doesNotMatch(page, /(?:\b(?:THB|USD)\s*\d|\b\d[\d,]*(?:\.\d+)?\s*(?:THB|บาท)\b)/i);
+});
