@@ -76,7 +76,10 @@ test('All Projects contains 15 Data Center, 30 Factory, 12 Building, then Solar 
   const cards = [...page.matchAll(/<article class="portfolio-card reveal">([\s\S]*?)<\/article>/g)];
 
   assert.equal(cards.length, 58);
+  assert.deepEqual(cards.slice(0, 15).map(([, card]) => card.match(/<h3>([^<]+)<\/h3>/)?.[1]), DATA_CENTER_HEADINGS);
   assert.deepEqual(cards.slice(0, 15).map(([, card]) => card.match(/assets\/projects\/([^')]+)/)?.[1]), DATA_CENTER_ASSETS);
+  assert.deepEqual(cards.slice(0, 15).map(([, card]) => card.match(/<small>([^<]+)<\/small>/)?.[1]), DATA_CENTER_LOCATIONS);
+  assert.deepEqual(cards.slice(0, 15).map(([, card]) => card.match(/<p>([^<]+)<\/p>/)?.[1]), DATA_CENTER_DESCRIPTIONS);
   assert.equal(cards.slice(15, 45).length, 30);
   assert.deepEqual(cards.slice(57).map(([, card]) => ({
     asset: card.match(/--thumb:url\('([^']+)'\)/)?.[1],

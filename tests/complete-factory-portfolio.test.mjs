@@ -89,13 +89,13 @@ test('All Projects contains 15 Data Center, 30 Factory, 12 Building, then Solar'
   const cards = portfolioCards(allProjects);
 
   assert.equal(cards.length, 58);
+  assert.deepEqual(cards.slice(0, 15), portfolioCards(dataCenter));
   assert.deepEqual(
-    cards.slice(0, 15).map(({ asset }) => asset),
-    portfolioCards(dataCenter).map(({ asset }) => asset),
-  );
-  assert.deepEqual(
-    cards.slice(15, 45).map(({ asset }) => asset),
-    FACTORY_PROJECTS.map(({ asset }) => `assets/projects/factory/${asset}`),
+    cards.slice(15, 45),
+    FACTORY_PROJECTS.map((project) => ({
+      ...project,
+      asset: `assets/projects/factory/${project.asset}`,
+    })),
   );
   assert.deepEqual(cards.slice(57), [
     {
