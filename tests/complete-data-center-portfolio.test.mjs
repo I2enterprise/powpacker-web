@@ -58,6 +58,10 @@ test('all 15 approved Data Center WebP assets exist', async () => {
 
 test('Data Center page contains 15 source-ordered cards', async () => {
   const page = await readFile(path.join(root, 'projects-data-center.html'), 'utf8');
+  assert.match(
+    page,
+    /<section class="page-hero" style="--page-image:url\('https:\/\/images\.unsplash\.com\/photo-1558494949-ef010cbdcc31\?auto=format&fit=crop&w=1800&q=85'\)">/,
+  );
   const cards = [...page.matchAll(/<article class="portfolio-card reveal">([\s\S]*?)<\/article>/g)];
 
   assert.equal(cards.length, 15);
