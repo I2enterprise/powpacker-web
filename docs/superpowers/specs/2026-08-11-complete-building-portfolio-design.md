@@ -56,4 +56,3 @@ Thai project names, locations, and work types should follow the source where ava
 - Verify exact counts, ordering, asset mappings, locations, descriptions, absence of monetary values and remote source links, and preservation of existing project payloads.
 - Run the full Node test suite and `git diff --check` after every task.
 - Inspect Building and All Projects at desktop, tablet, and mobile widths with no blank images or horizontal overflow.
-

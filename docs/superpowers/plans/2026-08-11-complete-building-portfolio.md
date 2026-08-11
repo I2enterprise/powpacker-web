@@ -129,4 +129,3 @@ If existing Data Center or Factory tests still assert the former 47-card contrac
 - [ ] **Step 4: Run GREEN, responsive checks, and commit**
 
 Run focused Building tests, full `npm.cmd test`, `git diff --check`, byte-preservation checks, and HTTP 200 probes. Inspect `projects-building.html` and `projects.html` at 1440, 768, and 390 pixels; verify 12/58 visible cards, no blank images, no horizontal overflow, and no console warnings/errors. Commit the integration and necessary test updates as `feat: add Building projects to complete portfolio`.
-
