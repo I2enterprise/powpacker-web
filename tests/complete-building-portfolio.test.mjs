@@ -20,6 +20,21 @@ export const BUILDING_PROJECTS = [
   { asset: '12-state-audit-office-bueng-kan.webp', location: 'BUENG KAN', heading: 'อาคารที่ทำการและอาคารชุดพักอาศัย สตง.บึงกาฬ', description: 'Structure & Architecture Work & M&E Work' },
 ];
 
+export const BUILDING_SOURCE_TO_ASSET = [
+  { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20001.jpg', asset: '01-cholasa-place.webp' },
+  { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20002.jpg', asset: '02-revenue-department.webp' },
+  { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20003.jpg', asset: '03-baac-khok-samrong.webp' },
+  { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20004.jpg', asset: '04-baac-pho-thale.webp' },
+  { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20005.jpg', asset: '05-baac-nong-chang.webp' },
+  { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20006.jpg', asset: '06-nakhon-sawan-product-design-building.webp' },
+  { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20007.jpg', asset: '07-nakhon-sawan-innovation-center.webp' },
+  { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20008.jpg', asset: '08-new-canteen-building.webp' },
+  { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20009.jpg', asset: '09-national-sports-training-center.webp' },
+  { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20010.jpg', asset: '10-tcg-headquarters-renovation.webp' },
+  { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20011.jpg', asset: '11-state-audit-office-buriram.webp' },
+  { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20012.jpg', asset: '12-state-audit-office-bueng-kan.webp' },
+];
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const projectsDir = path.join(root, 'assets', 'projects', 'building');
 
@@ -46,6 +61,29 @@ function webpDimensions(bytes) {
 test('all 12 approved Building WebP assets are 650 by 371 and unique', async () => {
   assert.equal(BUILDING_PROJECTS.length, 12);
   assert.equal(new Set(BUILDING_PROJECTS.map(({ asset }) => asset)).size, 12);
+  assert.deepEqual(
+    BUILDING_SOURCE_TO_ASSET,
+    [
+      { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20001.jpg', asset: '01-cholasa-place.webp' },
+      { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20002.jpg', asset: '02-revenue-department.webp' },
+      { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20003.jpg', asset: '03-baac-khok-samrong.webp' },
+      { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20004.jpg', asset: '04-baac-pho-thale.webp' },
+      { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20005.jpg', asset: '05-baac-nong-chang.webp' },
+      { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20006.jpg', asset: '06-nakhon-sawan-product-design-building.webp' },
+      { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20007.jpg', asset: '07-nakhon-sawan-innovation-center.webp' },
+      { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20008.jpg', asset: '08-new-canteen-building.webp' },
+      { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20009.jpg', asset: '09-national-sports-training-center.webp' },
+      { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20010.jpg', asset: '10-tcg-headquarters-renovation.webp' },
+      { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20011.jpg', asset: '11-state-audit-office-buriram.webp' },
+      { sourceUrl: 'http://www.pacdd.com/images/pulldown_1658723202/buil%20012.jpg', asset: '12-state-audit-office-bueng-kan.webp' },
+    ],
+    'Building source URLs must map sequentially to their approved local assets',
+  );
+  assert.deepEqual(
+    BUILDING_SOURCE_TO_ASSET.map(({ asset }) => asset),
+    BUILDING_PROJECTS.map(({ asset }) => asset),
+    'Building source mapping must cover every project asset in source order',
+  );
 
   const hashes = [];
   for (const { asset } of BUILDING_PROJECTS) {
