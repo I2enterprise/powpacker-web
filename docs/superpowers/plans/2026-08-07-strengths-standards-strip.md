@@ -2,18 +2,21 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the numeric statistics strips on the home and About Us pages with responsive, bilingual cards describing POWPACKER's four working standards.
+**Goal:** Replace the numeric statistics strips on the home and About Us pages with responsive, bilingual cards describing POWPACKER's four working standards, remove the separate About Us company-facts row without replacement, and align every home credentials card with work certification.
 
-**Architecture:** Keep the change static and dependency-free: both HTML pages receive the same semantic strip markup, `styles.css` owns the shared responsive presentation, and `translations.js` supplies the existing Thai-to-English text mapping. A Node test reads the generated source files to protect the agreed scope, including preservation of the capital and shareholder content outside the strips.
+**Architecture:** Keep the change static and dependency-free: both HTML pages receive the same semantic strip markup, `styles.css` owns the shared responsive presentation, and `translations.js` supplies the existing Thai-to-English text mapping. The About Us company-facts markup and its dedicated `brand.css` rules are removed together so no empty layout or dead styling remains. The existing home credentials layout is reused while its two company-information cards become qualitative certification evidence. Static checks protect structure, language mappings, responsive rules, and approved copy; the local preview remains available for external-browser inspection.
 
-**Tech Stack:** Static HTML5, CSS Grid, vanilla JavaScript translation dictionary, Node.js built-in test runner
+**Tech Stack:** Static HTML5, CSS Grid, vanilla JavaScript translation dictionary, Node.js static checks, local HTTP server
 
 ## Global Constraints
 
-- Replace only the `<section class="numbers">` section in `index.html` and `about.html`.
+- Replace the `<section class="numbers">` section in `index.html` and `about.html`.
 - Preserve the existing blue background, four-column rhythm, and surrounding page flow.
-- Do not change the registered-capital or shareholder information shown elsewhere on either page.
-- Do not change the existing credentials section or company-facts section.
+- Preserve the existing three-card credentials layout and the `11 Documents / Work Certificates` card on the home page.
+- Replace `20M / THB / Registered Capital` with `VERIFIED / By Organizations / Official Work Confirmation`.
+- Replace `60% / I2 / Major Shareholder` with `PROVEN / Delivery Quality / Project References`.
+- Remove the entire `.company-facts` row from `about.html`, including registered date, registered capital, major shareholder, and head office.
+- Collapse the space occupied by `.company-facts`; do not add replacement content.
 - Present exactly four principles: Quality, Precision, Safety, and Reliability.
 - Use four columns on desktop, two columns on tablet, and one column on narrow mobile screens.
 - Preserve reveal-on-scroll behavior and remove counter animation from the replaced markup.
@@ -23,16 +26,15 @@
 
 ## File Structure
 
-- `index.html`: replace the home-page numeric strip with the shared standards markup.
-- `about.html`: replace only the trailing numeric strip with the same standards markup.
+- `index.html`: replace the home-page numeric strip with the shared standards markup and align the credentials cards with certification evidence.
+- `about.html`: replace the trailing numeric strip with the shared standards markup and remove the company-facts row.
 - `styles.css`: replace numeric-strip selectors with standard-card typography, separators, and responsive layouts.
 - `translations.js`: add English mappings for the new Thai titles and descriptions.
-- `tests/strengths-standards.test.mjs`: verify strip content, semantics, translation coverage, responsive CSS, and preservation of out-of-scope company figures.
+- `brand.css`: remove the orphaned company-facts rules while preserving the directors grid.
 
 ### Task 1: Replace Both Numeric Strips with the Bilingual Standards Component
 
 **Files:**
-- Create: `tests/strengths-standards.test.mjs`
 - Modify: `index.html:59-61`
 - Modify: `about.html:1`
 - Modify: `styles.css:1`
@@ -40,77 +42,15 @@
 
 **Interfaces:**
 - Consumes: `window.FULL_EN`, read by `translateFullSite(lang)` in `script.js`; `.reveal`, observed by the existing `IntersectionObserver`.
-- Produces: two `.standards` sections, each containing one `.standards-grid` and four `.standard-item` articles; English translations keyed by the exact Thai source strings.
+- Produces: two `.standards` sections, each containing one `.standards-grid` and four `.standard-item` articles; English translations keyed by the exact Thai source strings; browser-visible four-, two-, and one-column layouts.
 
-- [ ] **Step 1: Write the failing source-contract test**
+- [ ] **Step 1: Establish the failing component check (RED)**
 
-Create `tests/strengths-standards.test.mjs`:
+Before editing production files, inspect `index.html` and `about.html` and record that `.standards-grid` is absent while the old `.numbers-grid` contains four numeric items. This is the expected RED result because the requested standards component does not exist yet.
 
-```js
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+The in-app browser was attempted through localhost, loopback IP, LAN IP, and a direct file URL, but its security policy blocked every local route. The user explicitly approved static HTML/CSS and translation verification as the fallback. Do not edit production files before the RED evidence is recorded.
 
-const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-
-const principles = [
-  ['QUALITY', 'คุณภาพ', 'ส่งมอบงานด้วยมาตรฐานและความใส่ใจในทุกขั้นตอน'],
-  ['PRECISION', 'ความแม่นยำ', 'วางแผนและดำเนินงานอย่างถูกต้องตามรายละเอียด'],
-  ['SAFETY', 'ความปลอดภัย', 'ให้ความสำคัญกับความปลอดภัยในการทำงานและการใช้งาน'],
-  ['RELIABILITY', 'ความน่าเชื่อถือ', 'ดูแลโครงการอย่างรับผิดชอบและพร้อมสนับสนุนระยะยาว']
-];
-
-function standardsSection(html) {
-  const match = html.match(/<section class="numbers standards">[\s\S]*?<\/section>/);
-  assert.ok(match, 'standards section should exist');
-  return match[0];
-}
-
-test('home and About Us pages render the four standards without counters', async () => {
-  for (const page of ['index.html', 'about.html']) {
-    const section = standardsSection(await read(page));
-    assert.equal((section.match(/class="standard-item"/g) || []).length, 4);
-    assert.doesNotMatch(section, /data-count|Registered Capital|I2 Enterprise Holding/);
-    for (const [label, title, description] of principles) {
-      assert.match(section, new RegExp(label));
-      assert.match(section, new RegExp(title));
-      assert.match(section, new RegExp(description));
-    }
-  }
-});
-
-test('company figures outside the replaced strips remain unchanged', async () => {
-  const home = await read('index.html');
-  const about = await read('about.html');
-  assert.match(home, /<strong>20M<\/strong><span>THB<\/span>/);
-  assert.match(home, /<strong>60%<\/strong><span>I2<\/span>/);
-  assert.match(about, /THB 20,000,000/);
-  assert.match(about, /I2 Enterprise PCL · 60%/);
-});
-
-test('new Thai copy has English translation entries', async () => {
-  const translations = await read('translations.js');
-  for (const [, title, description] of principles) {
-    assert.match(translations, new RegExp(`'${title}':'[^']+'`));
-    assert.match(translations, new RegExp(`'${description}':'[^']+'`));
-  }
-});
-
-test('standards grid declares desktop, tablet, and mobile layouts', async () => {
-  const css = await read('styles.css');
-  assert.match(css, /\.standards-grid\{[^}]*grid-template-columns:repeat\(4,1fr\)/);
-  assert.match(css, /@media\(max-width:980px\)[\s\S]*\.standards-grid\{[^}]*grid-template-columns:repeat\(2,1fr\)/);
-  assert.match(css, /@media\(max-width:700px\)[\s\S]*\.standards-grid\{[^}]*grid-template-columns:1fr/);
-});
-```
-
-- [ ] **Step 2: Run the test and confirm the new contract fails**
-
-Run: `npm test`
-
-Expected: FAIL because neither page contains `<section class="numbers standards">` yet.
-
-- [ ] **Step 3: Replace the numeric strip markup on both pages**
+- [ ] **Step 2: Replace the numeric strip markup on both pages**
 
 In both `index.html` and `about.html`, replace only the current `<section class="numbers">...</section>` with:
 
@@ -127,7 +67,9 @@ In both `index.html` and `about.html`, replace only the current `<section class=
 
 Do not edit `.certs` in `index.html` or `.company-facts` in `about.html`.
 
-- [ ] **Step 4: Replace numeric typography with standards-card styling**
+This instruction applies to Task 1 only. Task 2 deliberately removes `.company-facts`, and Task 3 deliberately replaces the `20M` and `60%` credentials cards after the standards component is complete.
+
+- [ ] **Step 3: Replace numeric typography with standards-card styling**
 
 In `styles.css`, keep `.numbers{padding:72px 0;background:var(--blue);color:#fff}` and replace the remaining `.numbers-grid`, `.numbers strong`, `.numbers span`, and `.numbers p` rules with:
 
@@ -158,7 +100,7 @@ Inside the existing `@media(max-width:700px)` block, replace the obsolete `.numb
 .standard-item:last-child{border-bottom:0;padding-bottom:0}
 ```
 
-- [ ] **Step 5: Add exact English translations for the new Thai copy**
+- [ ] **Step 4: Add exact English translations for the new Thai copy**
 
 Add these entries to `window.FULL_EN` in `translations.js`:
 
@@ -174,23 +116,166 @@ Add these entries to `window.FULL_EN` in `translations.js`:
 'มาตรฐานการทำงานของ POWPACKER':'POWPACKER working standards',
 ```
 
-- [ ] **Step 6: Run automated verification**
+- [ ] **Step 5: Run automated verification**
 
 Run: `npm test`
 
-Expected: all four source-contract tests PASS, along with any existing tests.
+Expected: all existing tests PASS with pristine output.
 
 Run: `git diff --check`
 
 Expected: no whitespace errors.
 
-- [ ] **Step 7: Inspect the rendered pages at responsive widths**
+- [ ] **Step 6: Verify component structure and responsive behavior (GREEN)**
 
-Serve the project locally and inspect `index.html` and `about.html` at approximately 1440 px, 768 px, and 390 px viewport widths. Confirm four columns, two columns, and one column respectively; separators must terminate cleanly and surrounding sections must not gain unintended gaps.
+Inspect `index.html` and `about.html`. On both pages, confirm that `.standards-grid` exists, contains exactly four `.standard-item` elements, and contains no `[data-count]`. Inspect the CSS rules and confirm four, two, and one grid columns at the desktop, `max-width:980px`, and `max-width:700px` breakpoints respectively, including appropriate separator resets when items wrap.
 
-- [ ] **Step 8: Commit the implementation**
+Confirm each exact Thai title and description has its specified English mapping in `translations.js`, while `QUALITY`, `PRECISION`, `SAFETY`, and `RELIABILITY` remain literal labels in both pages. Confirm the existing `20M` and `60%` content remains present in the home credentials section and the corresponding company facts remain present on the About Us page.
+
+- [ ] **Step 7: Commit the implementation**
 
 ```bash
-git add index.html about.html styles.css translations.js tests/strengths-standards.test.mjs
+git add index.html about.html styles.css translations.js
 git commit -m "feat: replace company stats with working standards"
+```
+
+### Task 2: Remove the About Us Company-Facts Row
+
+**Files:**
+- Modify: `about.html:1`
+- Modify: `brand.css:5-6`
+
+**Interfaces:**
+- Consumes: the existing `.mission-grid`, `#board` heading, `.directors` grid, and the home-page `.certs` section.
+- Produces: an About Us content flow where `.mission-grid` is followed directly by `#board`, with no `.company-facts` markup or CSS; the home credentials remain unchanged.
+
+- [ ] **Step 1: Establish the failing removal check (RED)**
+
+Before editing production files, run a focused static check that asserts `about.html` contains no `.company-facts` element and `brand.css` contains no `.company-facts` selector. Record the expected failure because both the row and its styling still exist. Also record that the current row has exactly four items so the removal scope is explicit.
+
+- [ ] **Step 2: Remove the entire company-facts row from About Us**
+
+In `about.html`, remove this complete element and leave no empty wrapper:
+
+```html
+<div class="company-facts reveal"><div><small>REGISTERED</small><strong>7 February 2025</strong></div><div><small>REGISTERED CAPITAL</small><strong>THB 20,000,000</strong></div><div><small>MAJOR SHAREHOLDER</small><strong>I2 Enterprise PCL · 60%</strong></div><div><small>HEAD OFFICE</small><strong>Latphrao, Bangkok</strong></div></div>
+```
+
+Do not add a replacement section. The existing `<div class="content-heading reveal" id="board" ...>` must follow the closing `.mission-grid` directly.
+
+- [ ] **Step 3: Remove orphaned company-facts CSS**
+
+In `brand.css`, remove these now-unused selectors and their declarations:
+
+```css
+.company-facts
+.company-facts div
+.company-facts small
+.company-facts strong
+```
+
+Inside `@media(max-width:700px)`, change the combined selector:
+
+```css
+.company-facts,.directors{grid-template-columns:1fr 1fr}
+```
+
+to:
+
+```css
+.directors{grid-template-columns:1fr 1fr}
+```
+
+Do not change any `.directors` declarations or other responsive behavior.
+
+- [ ] **Step 4: Verify the removal and preserved scope (GREEN)**
+
+Run a focused static check confirming:
+
+- `about.html` has no `.company-facts` class, no four removed labels, and no four removed values.
+- `brand.css` has no `.company-facts` selector.
+- `.mission-grid` is followed directly by the existing `#board` content heading.
+- The About Us standards strip still has four `.standard-item` articles.
+- The home credentials section still contains `<strong>20M</strong>` and `<strong>60%</strong>`.
+
+Run: `npm.cmd test`
+
+Expected: all existing tests PASS with zero failures.
+
+Run: `git diff --check`
+
+Expected: no whitespace errors.
+
+- [ ] **Step 5: Confirm the local preview updates**
+
+Request `http://127.0.0.1:4173/about.html` from the existing preview server and confirm HTTP 200. The browser-access fallback remains static verification because the in-app browser blocks local routes; the user can inspect the same URL in Chrome or Edge.
+
+- [ ] **Step 6: Commit the removal**
+
+```bash
+git add about.html brand.css
+git commit -m "feat: remove about company facts"
+```
+
+Task 2's Home credentials preservation check records the state before Task 3. Task 3 intentionally replaces those two cards while retaining the credentials layout and first card.
+
+### Task 3: Align the Home Credentials Cards with Certification Evidence
+
+**Files:**
+- Modify: `index.html:78`
+
+**Interfaces:**
+- Consumes: the existing `.credentials`, `.credential-grid`, and three-card `.certs` layout plus the `awards.html` link.
+- Produces: exactly three certification-related cards with the first card unchanged and two approved qualitative evidence cards; no company capital/shareholder data remains in `section#credentials`.
+
+- [ ] **Step 1: Establish the failing credentials check (RED)**
+
+Before editing production files, isolate `section#credentials` in `index.html` and record:
+
+- exactly three `.certs` cards exist;
+- the first card is `11 / Documents / Work Certificates`;
+- the second card still contains `20M / THB / Registered Capital`;
+- the third card still contains `60% / I2 / Major Shareholder`;
+- the approved `VERIFIED` and `PROVEN` cards are absent.
+
+Assert the approved final state and record the expected failure before editing.
+
+- [ ] **Step 2: Replace only the two company-information cards**
+
+In `section#credentials` within `index.html`, preserve the first card and replace the second and third card markup with:
+
+```html
+<div><strong>VERIFIED</strong><span>By Organizations</span><small>OFFICIAL WORK CONFIRMATION</small></div><div><strong>PROVEN</strong><span>Delivery Quality</span><small>PROJECT REFERENCES</small></div>
+```
+
+Do not change the section heading, description, button, link, `.certs` wrapper, first card, CSS, translations, or any other occurrence outside `section#credentials`.
+
+- [ ] **Step 3: Verify the approved credentials state (GREEN)**
+
+Run a focused static check confirming:
+
+- `section#credentials` contains exactly three `.certs` cards.
+- The first card remains exactly `11 / Documents / Work Certificates`.
+- The second and third cards contain the exact approved `VERIFIED` and `PROVEN` copy.
+- `20M`, `THB`, `REGISTERED CAPITAL`, `60%`, `I2`, and `MAJOR SHAREHOLDER` are absent from `section#credentials`.
+- The existing `awards.html` link and button copy remain unchanged.
+- The standards sections and About Us removal remain unchanged.
+
+Run: `npm.cmd test`
+
+Expected: all existing tests PASS with zero failures.
+
+Run: `git diff --check`
+
+Expected: no whitespace errors.
+
+- [ ] **Step 4: Confirm the local preview updates**
+
+Request `http://127.0.0.1:4173/index.html` from the existing preview server and confirm HTTP 200. Inspect the updated credentials section in the available browser at desktop width and confirm the two approved labels fit inside their cards without clipping.
+
+- [ ] **Step 5: Commit the credentials update**
+
+```bash
+git add index.html
+git commit -m "feat: align credentials with certifications"
 ```
